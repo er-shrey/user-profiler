@@ -1,0 +1,26 @@
+{
+	"port": 8001,
+	"emailHeader": "http://localhost:8001",
+	"database": {
+		"databaseName": "database",
+		"port": "",
+		"host": "localhost",
+		"username": "username",
+		"password": "password",
+		"dialect": "sqlite"
+	},
+	"smtp": {
+		"host": "smtp.gmail.com",
+		"port":465,
+		"secure": true,
+		"username":"",
+		"password":"",
+		"sender":""
+	},
+	"mailSettings": {
+		"newUserMail": {
+			"url": "/#/profile/"
+		}
+	},
+  	"tokenSecretKey":"dz-e6*6-fo*c4zh^mjihqcw2)#zea@z&_vnrz08#-^2utxxc*b"
+}
