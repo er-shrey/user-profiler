@@ -1,74 +1,75 @@
 # User Profiler
 
-This application is submitted as an assignment as an interview process at Logikview Analytics.
+A user-profile management app built for an interview assignment. Admins add user records to a database; a scheduled cron job periodically finds users who haven't completed their profile yet and emails them a link to update it, repeating on an interval until the profile is completed.
 
+## Tech stack
 
-## Design Document
+- Backend: Node.js (Express 4), version 12+
+- Frontend: Angular 9 (TypeScript), served as a static build from `client/production/user-profiler`
+- Database: SQLite via Sequelize ORM (swappable to mysql/mariadb/postgres/mssql)
+- Scheduling: `node-cron`
+- Email: `nodemailer`
+- Auth/tokens: `jsonwebtoken`
+- License: LGPL-3.0
 
-- Admin can add User profile data in a database table.
-- At a certain interval ( 30 min ), a scheduler will fetch the records which are new i.e. user didn't updated*.
-- After fetching, a profile edit link is created and sent to user via email.
-- User then updates the profile based on the link.
+## Project structure
 
-> User will keep recieving profile update link on every interval untill and unless user updates the profile.
+- `app.js` — Express app entry point (serves API + static Angular build, wires up cron jobs)
+- `bin/www` — HTTP server bootstrap (`npm start` runs this)
+- `routes/` — `index.js` (page routes) and `api.js` (REST API, e.g. user creation)
+- `config/config.json` — app configuration (server port, database, SMTP, JWT secret)
+- `config/database/` — Sequelize database connection and models
+- `cronJobs/newUserMailCron.js` — the recurring "send profile update link" job
+- `client/development/user-profiler/` — the Angular 9 source app (edit this)
+- `client/production/user-profiler/` — the built/compiled Angular output that Express actually serves
 
+## Prerequisites
 
-## Application details:
+- Node.js 12+
+- npm
+- Angular CLI (`npm i -g @angular/cli`) — only needed if you're modifying the frontend
 
-- Backend: NodeJs, version: 12+
-- Frontend: Angular, version: 9+
-- Database: Sqlite
-- ORM: Sequelize
+## Installation
 
-## App configurations
+```bash
+npm install
+```
 
-Application configuration file is `./config/config.json`
+## Configuration
 
-You'll find configuration for Database, SMTP, etc.
+Edit `config/config.json` before running:
+- `database` — `databaseName`, `host`, `port`, `username`, `password`, `dialect` (default: `sqlite`; switch to `mysql`/`mariadb`/`postgres`/`mssql` if needed, installing the matching Sequelize driver)
+- `smtp` — mail server host/port/credentials used to send profile-update emails
+- `tokenSecretKey` — secret used to sign JWTs
 
-### Configuring Database settings
+## Running the backend
 
-We have the following fields for database settings
-- databaseName: Database name
-- port: Port of DB server
-- host: Server host of the DB
-- username: Username of DB user
-- password: Password of DB user
-- dialect: Type of Database server (values can be: sqlite | mysql | mariadb | postgres | mssql )
+```bash
+npm start
+```
 
-> Currently the selected dialect/database is `sqlite`, if you want to change the database, make sure you install the appropriate middleware.
+Starts the Express server on the configured port (default `8001`), serving both the API and the pre-built Angular frontend from `client/production/user-profiler`.
 
-### Configuring SMTP settings
+## Working on the frontend (optional)
 
-The following settings are available for SMTP
-- host: Server host, eg: `smtp.gmail.com`
-- port: Port where server accepts SMTP requests, eg: 465
-- secure: `true` if port 465
-- username: Email of the sender
-- password: Password for authentication
-- sender: Name of the sender
+```bash
+cd client/development/user-profiler
+npm install
+npm start          # ng serve --open --port 8002 (dev server with live reload)
+npm run build       # ng build --prod -> outputs to be copied into client/production/user-profiler
+npm test            # ng test (Karma/Jasmine)
+npm run e2e          # Protractor e2e tests
+```
 
-## Running the Application
+## API
 
-After finishing the app configuration, you just need to start the server. Which can be done by following command:
-
-`npm start`
-
-The server will start by default to port `8001`
-
-## Creating User
-
-For creating a user, you'll require to make HTTP POST call to the following API
-
-`http://localhost:<port>/api/users/`
-
-The parameters that can be sent are as follows:
-- email (mandatory)
-- firstname (optional)
-- lastname (optional)
-
-You can use postman to do this
+Create a user via HTTP POST:
 
 ```
-The application is protected under GPLv3.0
+POST http://localhost:<port>/api/users/
 ```
+
+Body parameters:
+- `email` (required)
+- `firstname` (optional)
+- `lastname` (optional)
